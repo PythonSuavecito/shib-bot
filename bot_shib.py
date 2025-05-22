@@ -79,10 +79,15 @@ def main():
     app.add_handler(CommandHandler("precio_shib", precio_shib))
     
     if os.getenv('RENDER'):
+        # Configuración específica para Render
+        WEBHOOK_URL = os.getenv('WEBHOOK_URL')
+        if not WEBHOOK_URL:
+            raise ValueError("WEBHOOK_URL no está configurado")
+            
         app.run_webhook(
             listen="0.0.0.0",
-            port=10000,
-            webhook_url=os.getenv('WEBHOOK_URL'),
+            port=10000,  # Puerto obligatorio para Render
+            webhook_url=WEBHOOK_URL,
             secret_token=os.getenv('SECRET_TOKEN'),
             drop_pending_updates=True
         )
