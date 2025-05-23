@@ -25,8 +25,8 @@ def wake_up():
     finally:
         threading.Timer(300, wake_up).start()
 
-if os.getenv('RENDER'):
-    wake_up()
+async def start(update: Update, context):
+    await update.message.reply_text("👋 ¡Bot SHIB activado! Usa /precio_shib")
 
 async def precio_shib(update: Update, context):
     global HISTORIAL_PRECIOS
@@ -75,7 +75,12 @@ async def precio_shib(update: Update, context):
         await update.message.reply_text("❌ Error temporal al obtener datos. Intenta nuevamente.")
 
 def main():
+    # Iniciar health check si está en Render
+    if os.getenv('RENDER'):
+        wake_up()
+
     app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("precio_shib", precio_shib))
     
     if os.getenv('RENDER'):
@@ -87,6 +92,8 @@ def main():
             drop_pending_updates=True
         )
     else:
+        # Modo desarrollo con logging más detallado
+        logging.getLogger().setLevel(logging.DEBUG)
         app.run_polling()
 
 if __name__ == "__main__":
